@@ -5,13 +5,18 @@ set -euo pipefail
 
 REPO=https://github.com/smailic05/abduselim-ismailov.git
 DIR=/opt/abduselim-ismailov
+BRANCH=${BRANCH:-main}
 
 if [ "$(id -u)" -ne 0 ]; then echo "Запустите через sudo"; exit 1; fi
 
 if ! command -v git >/dev/null; then apt-get update && apt-get install -y git curl; fi
 if ! command -v docker >/dev/null; then curl -fsSL https://get.docker.com | sh; fi
 
-if [ -d "$DIR/.git" ]; then git -C "$DIR" pull --ff-only; else git clone "$REPO" "$DIR"; fi
+if [ -d "$DIR/.git" ]; then
+  git -C "$DIR" fetch origin "$BRANCH" && git -C "$DIR" checkout -B "$BRANCH" "origin/$BRANCH"
+else
+  git clone -b "$BRANCH" "$REPO" "$DIR"
+fi
 cd "$DIR/server"
 
 if [ ! -f .env ]; then
@@ -35,6 +40,10 @@ ENV
 fi
 
 mkdir -p data
+
+# open web ports if the firewall is on
+if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then ufw allow 80/tcp; ufw allow 443; fi
+
 docker compose up -d --build
 
 DOMAIN=$(grep '^DOMAIN=' .env | cut -d= -f2-)
