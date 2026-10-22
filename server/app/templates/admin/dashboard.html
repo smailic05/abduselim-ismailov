@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}Произведения{% endblock %}
+{% block content %}
+<main class="gutter">
+  <div class="toolbar">
+    <h1>Произведения</h1>
+    <a class="btn" href="/admin/works/new">Добавить произведение</a>
+  </div>
+  {% if saved == 'deleted' %}<p class="notice">Произведение удалено.</p>{% elif saved == 'restored' %}<p class="notice">Данные восстановлены из резервной копии.</p>{% endif %}
+  {% for key, name in SECTIONS %}
+  <section class="section-block">
+    <div class="toolbar"><h2>{{ name }}</h2><a class="more" href="/admin/works/new?section={{ key }}">Добавить</a></div>
+    {% if groups[key] %}
+    <ul class="group">
+      {% for w in groups[key] %}
+      <li id="w{{ w.id }}"><div class="wrow">
+        <div class="rtx">
+          <div class="rt"><a href="/admin/works/{{ w.id }}">{{ w.title }}</a></div>
+          <div class="rs">{{ w.subtitle or STYLES[w.style] }} · {{ LANGS[w.lang] }}</div>
+        </div>
+        <div class="acts">
+          <span class="pill {{ w.visibility }}">{{ VISIBILITY[w.visibility] }}</span>
+          <form method="post" action="/admin/works/{{ w.id }}/move"><input type="hidden" name="direction" value="up"><button class="icon-btn" type="submit" aria-label="Выше" {% if loop.first %}disabled{% endif %}>↑</button></form>
+          <form method="post" action="/admin/works/{{ w.id }}/move"><input type="hidden" name="direction" value="down"><button class="icon-btn" type="submit" aria-label="Ниже" {% if loop.last %}disabled{% endif %}>↓</button></form>
+        </div>
+      </div></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted">Пока пусто.</p>{% endif %}
+  </section>
+  {% endfor %}
+
+  <section class="section-block">
+    <h2>Резервная копия</h2>
+    <div class="card">
+      <p class="muted">В копии все произведения с полными текстами, биография и настройки. Скачивайте её время от времени и храните у себя.</p>
+      <div class="toolbar">
+        <a class="btn secondary" href="/admin/backup">Скачать копию</a>
+        <form method="post" action="/admin/restore" enctype="multipart/form-data" class="toolbar" onsubmit="return confirm('Заменить все данные сайта данными из этого файла?')">
+          <input type="file" name="dbfile" accept=".db" required aria-label="Файл резервной копии">
+          <button class="btn secondary" type="submit">Восстановить из файла</button>
+        </form>
+      </div>
+    </div>
+    <form method="post" action="/admin/logout"><button class="btn secondary" type="submit">Выйти</button></form>
+  </section>
+</main>
+{% endblock %}

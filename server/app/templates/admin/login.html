@@ -1,0 +1,13 @@
+{% extends "admin/base.html" %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<main class="login gutter">
+  <form class="card" method="post" action="/admin/login">
+    <h1>Вход в админку</h1>
+    {% if not configured %}<p class="error-box">Пароль не задан. Укажите ADMIN_PASSWORD в настройках сервера.</p>{% endif %}
+    {% if error %}<p class="error-box">{{ error }}</p>{% endif %}
+    <div class="field"><label for="password">Пароль</label><input id="password" name="password" type="password" autocomplete="current-password" required autofocus></div>
+    <button class="btn" type="submit">Войти</button>
+  </form>
+</main>
+{% endblock %}

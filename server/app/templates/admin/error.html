@@ -1,0 +1,5 @@
+{% extends "admin/base.html" %}
+{% block title %}Ошибка{% endblock %}
+{% block content %}
+<main class="gutter"><div class="card"><h1>Не получилось сохранить</h1><p class="error-box">{{ message }}</p><p><a class="more" href="javascript:history.back()">Вернуться к форме</a></p></div></main>
+{% endblock %}

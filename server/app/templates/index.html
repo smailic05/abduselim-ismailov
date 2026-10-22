@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="nav gutter">
+  <div class="nav-in">
+    <a class="brand" href="#top">{{ s.name }}</a>
+    <nav class="links" aria-label="Разделы">
+      <a href="#about">Биография</a>
+      {% if groups.books %}<a href="#books">Книги</a>{% endif %}
+      {% if groups.prose %}<a href="#prose">Проза</a>{% endif %}
+      {% if groups.plays %}<a class="opt" href="#plays">Пьесы</a>{% endif %}
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero gutter">
+    <div class="container">
+      <div class="copy">
+        {% if s.eyebrow %}<p class="eyebrow">{{ s.eyebrow }}</p>{% endif %}
+        <h1>{{ s.name }}</h1>
+        {% if s.tagline %}<p class="sub">{{ s.tagline }}</p>{% endif %}
+        <div class="ctas">
+          <a class="btn" href="#books">Смотреть книги</a>
+          <a class="more" href="#about">Биография</a>
+        </div>
+      </div>
+      {% if s.photo %}<div class="portrait"><img src="/uploads/{{ s.photo }}" alt="{{ s.name }}" width="540" height="675"></div>{% endif %}
+    </div>
+  </section>
+
+  {% if stats %}
+  <section class="stats gutter" aria-label="В цифрах">
+    <div class="container">
+      {% for num, label in stats %}<div class="stat"><b>{{ num }}</b><span>{{ label }}</span></div>{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if s.quote %}
+  <section class="quote gutter">
+    <blockquote>
+      <p>«{{ s.quote }}»</p>
+      {% if s.quote_source %}<cite>{{ s.quote_source }}</cite>{% endif %}
+    </blockquote>
+  </section>
+  {% endif %}
+
+  <section id="about" class="section alt gutter">
+    <div class="container">
+      <div class="head">
+        <h2>Биография</h2>
+        {% if s.bio_lede %}<p class="lede">{{ s.bio_lede }}</p>{% endif %}
+      </div>
+      <div class="bio-grid">
+        <div class="bio-text">{{ s.bio|safe }}</div>
+        {% if timeline %}
+        <ul class="timeline">
+          {% for t in timeline %}<li><span class="yr">{{ t.year }}</span><span>{{ t.text }}</span></li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  {% set ledes = {'books': 'Сборники стихов, поэм, повестей и рассказов. Откройте книгу, чтобы прочитать её и посмотреть, что в неё входит.', 'prose': 'Проза в переводе на русский язык.', 'plays': 'Драмы и сказки, поставленные на сцене национального театра.'} %}
+  {% for key, name in SECTIONS if groups[key] %}
+  <section id="{{ key }}" class="section gutter{% if loop.index is even %} alt{% endif %}">
+    <div class="container">
+      <div class="head">
+        <h2>{{ name }}</h2>
+        <p class="lede">{{ ledes[key] }}</p>
+      </div>
+      {% if key == 'books' %}
+      <ul class="shelf">
+        {% for w in groups[key] %}
+        <li><a class="book" href="/read/{{ w.slug }}"><div class="cover c{{ w.color }}"><span class="ca">А. Исмаилов</span><span class="ct">{{ w.title }}</span><span class="cl">{{ LANGS[w.lang] }}</span></div><span class="bt">{{ w.title }}</span><span class="bm">{{ w.subtitle }}</span></a></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <ul class="group">
+        {% for w in groups[key] %}
+        <li><a class="row" href="/read/{{ w.slug }}"><span class="rtx"><span class="rt">{{ w.title }}{% if w.lang != 'ru' %}<span class="badge">лезг.</span>{% endif %}</span><span class="rs">{{ w.subtitle }} · около {{ w.pages }} стр.</span></span><span class="chev" aria-hidden="true">›</span></a></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </section>
+  {% endfor %}
+</main>
+
+<footer class="footer gutter">
+  <div class="container">{{ s.footer }}</div>
+</footer>
+{% endblock %}
