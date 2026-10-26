@@ -1,6 +1,5 @@
 {% extends "admin/base.html" %}
 {% block title %}{{ w.title or 'Новое произведение' }}{% endblock %}
-{% block head %}<link rel="stylesheet" href="/static/vendor/quill.snow.css">{% endblock %}
 {% block content %}
 <form class="form" method="post" action="{{ '/admin/works/%d' % w.id if w.id else '/admin/works/new' }}" enctype="multipart/form-data" id="workform">
 <main class="gutter">
@@ -35,8 +34,8 @@
 
   <div class="section-block">
     <h2>Текст</h2>
-    <div class="editor-wrap"><div id="editor">{{ w.body|safe }}</div></div>
-    <input type="hidden" name="body" id="body">
+    <div class="editor-wrap"><textarea id="body" name="body" rows="30">{{ w.body }}</textarea></div>
+    <p class="hint">Текст можно вставить прямо из Word: форматирование сохранится. «Заголовок раздела» попадает в содержание произведения.</p>
   </div>
 
   {% if w.id %}
@@ -50,15 +49,7 @@
 <div class="savebar gutter"><div class="in"><a href="/admin">‹ <span class="long">Ко всем произведениям</span><span class="short">Назад</span></a><button class="btn" type="submit">Сохранить</button></div></div>
 </form>
 {% if w.id %}<form id="deleteform" method="post" action="/admin/works/{{ w.id }}/delete" onsubmit="return confirm('Удалить «{{ w.title }}» навсегда?')"></form>{% endif %}
-<script src="/static/vendor/quill.js"></script>
-<script>
-  var quill = new Quill('#editor', {
-    theme: 'snow',
-    placeholder: 'Вставьте или наберите текст произведения…',
-    modules: { toolbar: [[{ header: [2, 3, false] }], ['bold', 'italic', 'underline'], ['blockquote', { list: 'ordered' }, { list: 'bullet' }], ['clean']] }
-  });
-  document.getElementById('workform').addEventListener('submit', function () {
-    document.getElementById('body').value = quill.root.innerHTML;
-  });
-</script>
+<script src="/static/vendor/tinymce/tinymce.min.js"></script>
+<script src="/static/editor.js"></script>
+<script>initEditor('#body');</script>
 {% endblock %}

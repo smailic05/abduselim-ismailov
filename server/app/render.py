@@ -6,8 +6,14 @@ from collections import Counter
 
 from bs4 import BeautifulSoup, NavigableString
 
-ALLOWED = {'p', 'h2', 'h3', 'strong', 'b', 'em', 'i', 'u', 'blockquote', 'ul', 'ol', 'li', 'br', 'table', 'tr', 'td', 'th', 'tbody', 'thead', 'sup', 'sub'}
+ALLOWED = {'p', 'h2', 'h3', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'del', 'span', 'a', 'hr', 'blockquote', 'ul', 'ol',
+           'li', 'br', 'table', 'tr', 'td', 'th', 'tbody', 'thead', 'tfoot', 'caption', 'colgroup', 'col', 'sup', 'sub'}
 BLOCKS = ('p', 'h2', 'h3', 'blockquote', 'ul', 'ol', 'table')
+# formatting the editor may set; anything else in style="" is dropped
+STYLE_PROPS = {'text-align', 'color', 'background-color', 'font-size', 'font-family', 'font-weight', 'font-style',
+               'text-decoration', 'text-indent', 'padding-left', 'margin-left', 'line-height', 'vertical-align',
+               'width', 'border-collapse', 'list-style-type'}
+STYLE_VALUE = re.compile(r"^[#\w\s.,%'\"()+-]{1,120}$")
 LOWER = re.compile(r'[a-zа-яё]')
 LETTER = re.compile(r'[A-Za-zА-ЯЁа-яёӀ]')
 SKIP = {'АБДУСЕЛИМ ИСМАИЛОВ', 'А Б Д У С Е Л И М И С М А И Л О В', 'ИЛИ', 'К О Н Е Ц', 'КОНЕЦ'}
@@ -15,6 +21,16 @@ SKIP = {'АБДУСЕЛИМ ИСМАИЛОВ', 'А Б Д У С Е Л И М И С
 
 def norm(t):
     return re.sub(r'\s+', ' ', t.replace('\xa0', ' ')).strip()
+
+
+def clean_style(style):
+    out = []
+    for decl in (style or '').split(';'):
+        prop, _, value = decl.partition(':')
+        prop, value = prop.strip().lower(), value.strip()
+        if prop in STYLE_PROPS and STYLE_VALUE.match(value) and not re.search(r'url|expression|javascript', value, re.I):
+            out.append(f'{prop}: {value}')
+    return '; '.join(out)
 
 
 def sanitize(html):
@@ -30,7 +46,15 @@ def sanitize(html):
         if tag.name not in ALLOWED:
             tag.unwrap()
             continue
-        tag.attrs = {k: v for k, v in tag.attrs.items() if k in ('colspan', 'rowspan')}
+        attrs = {k: v for k, v in tag.attrs.items() if k in ('colspan', 'rowspan')}
+        style = clean_style(tag.get('style', ''))
+        if style:
+            attrs['style'] = style
+        if tag.name == 'a':
+            href = (tag.get('href') or '').strip()
+            if re.match(r'^(https?:|mailto:)', href, re.I):
+                attrs.update(href=href, rel='noopener', target='_blank')
+        tag.attrs = attrs
     # drop empty paragraphs and headings
     for tag in soup.find_all(['p', 'h2', 'h3']):
         if not norm(tag.get_text()) and not tag.find('br'):

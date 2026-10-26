@@ -17,14 +17,16 @@
     <div class="container">
       <div class="copy">
         {% if s.eyebrow %}<p class="eyebrow">{{ s.eyebrow }}</p>{% endif %}
-        <h1>{{ s.name }}</h1>
+        {% set parts = s.name.split(' ', 1) %}
+        <h1>{% for part in parts %}<span>{{ part }}</span>{% endfor %}</h1>
+        <span class="ornament" aria-hidden="true"></span>
         {% if s.tagline %}<p class="sub">{{ s.tagline }}</p>{% endif %}
         <div class="ctas">
-          <a class="btn" href="#books">Смотреть книги</a>
+          <a class="btn" href="#books">Читать книги</a>
           <a class="more" href="#about">Биография</a>
         </div>
       </div>
-      {% if s.photo %}<div class="portrait"><img src="/uploads/{{ s.photo }}" alt="{{ s.name }}" width="540" height="675"></div>{% endif %}
+      {% if s.photo %}<figure class="portrait"><div class="frame"><img src="/uploads/{{ s.photo }}" alt="{{ s.name }}" width="540" height="675"></div></figure>{% endif %}
     </div>
   </section>
 
@@ -48,6 +50,7 @@
   <section id="about" class="section alt gutter">
     <div class="container">
       <div class="head">
+        <p class="chapter">Глава I</p>
         <h2>Биография</h2>
         {% if s.bio_lede %}<p class="lede">{{ s.bio_lede }}</p>{% endif %}
       </div>
@@ -67,6 +70,7 @@
   <section id="{{ key }}" class="section gutter{% if loop.index is even %} alt{% endif %}">
     <div class="container">
       <div class="head">
+        <p class="chapter">Глава {{ ['II', 'III', 'IV', 'V'][loop.index0] }}</p>
         <h2>{{ name }}</h2>
         <p class="lede">{{ ledes[key] }}</p>
       </div>
@@ -79,7 +83,7 @@
       {% else %}
       <ul class="group">
         {% for w in groups[key] %}
-        <li><a class="row" href="/read/{{ w.slug }}"><span class="rtx"><span class="rt">{{ w.title }}{% if w.lang != 'ru' %}<span class="badge">лезг.</span>{% endif %}</span><span class="rs">{{ w.subtitle }} · около {{ w.pages }} стр.</span></span><span class="chev" aria-hidden="true">›</span></a></li>
+        <li><a class="row" href="/read/{{ w.slug }}"><span class="rtx"><span class="rt">{{ w.title }}{% if w.lang != 'ru' %}<span class="badge">лезг.</span>{% endif %}</span><span class="rs">{{ w.subtitle }} · около {{ w.pages }} стр.</span></span></a></li>
         {% endfor %}
       </ul>
       {% endif %}
@@ -89,6 +93,6 @@
 </main>
 
 <footer class="footer gutter">
-  <div class="container">{{ s.footer }}</div>
+  <div class="container"><span class="ornament" aria-hidden="true"></span>{{ s.footer }}</div>
 </footer>
 {% endblock %}

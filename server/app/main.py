@@ -8,7 +8,7 @@ import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -24,7 +24,6 @@ SECTIONS = [('books', 'Книги'), ('prose', 'Повести и рассказ
 LANGS = {'ru': 'На русском', 'lez': 'На лезгинском', 'mix': 'Лезгинский и русский'}
 STYLES = {'prose': 'Проза', 'verse': 'Стихи', 'play': 'Пьеса'}
 VISIBILITY = {'excerpt': 'Только начало', 'full': 'Полный текст', 'hidden': 'Скрыто'}
-PHOTO_TYPES = {'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp'}
 
 @asynccontextmanager
 async def lifespan(app):
@@ -69,6 +68,8 @@ def stats_list(value, count):
 def home(request: Request):
     with db.session() as c:
         s = db.settings(c)
+        if s.get('photo') and not c.execute('SELECT 1 FROM files WHERE name = ?', (s['photo'],)).fetchone():
+            s['photo'] = ''
         works = c.execute("SELECT * FROM works WHERE visibility != 'hidden' ORDER BY section, position, id").fetchall()
         timeline = c.execute('SELECT * FROM timeline ORDER BY position, id').fetchall()
     groups = {k: [] for k, _ in SECTIONS}
@@ -112,10 +113,11 @@ def index_html():
 
 @app.get('/uploads/{name}')
 def uploads(name: str):
-    path = os.path.join(db.UPLOADS, os.path.basename(name))
-    if not os.path.isfile(path):
+    with db.session() as c:
+        f = c.execute('SELECT mime, data FROM files WHERE name = ?', (os.path.basename(name),)).fetchone()
+    if not f:
         raise HTTPException(404)
-    return FileResponse(path, headers={'Cache-Control': 'public, max-age=86400'})
+    return Response(f['data'], media_type=f['mime'], headers={'Cache-Control': 'public, max-age=86400'})
 
 
 # ---------- Admin: login ----------
@@ -293,17 +295,17 @@ async def about_save(request: Request, name: str = Form(''), eyebrow: str = Form
               'quote_source': quote_source.strip(), 'bio_lede': bio_lede.strip(), 'bio': render.sanitize(bio),
               'stats': stats.strip(), 'footer': footer.strip()}
     if photo is not None and photo.filename:
-        ext = PHOTO_TYPES.get(photo.content_type or '')
-        if not ext:
-            raise HTTPException(400, 'Фото должно быть в формате JPG, PNG или WebP')
         data = await photo.read()
         if len(data) > 15 * 1024 * 1024:
             raise HTTPException(400, 'Фото больше 15 МБ')
+        ext = db.sniff_image(data)
+        if not ext:
+            raise HTTPException(400, 'Фото должно быть в формате JPG, PNG или WebP. Фото с iPhone (HEIC) сначала сохраните как JPG.')
         fname = f'author-{int(time.time())}{ext}'
-        with open(os.path.join(db.UPLOADS, fname), 'wb') as fh:
-            fh.write(data)
         values['photo'] = fname
     with db.session() as c:
+        if 'photo' in values:
+            c.execute('INSERT INTO files (name, mime, data) VALUES (?, ?, ?)', (fname, db.MIME[ext], data))
         for k, v in values.items():
             c.execute('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value', (k, v))
         c.execute('DELETE FROM timeline')

@@ -4,7 +4,6 @@ Usage: python -m tools.seed <html_dir> <author_photo.jpg>
 Run from the server/ folder. Writes data/site.db (and data/uploads/author.jpg).
 """
 import os
-import shutil
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -86,8 +85,8 @@ def main(html_dir, photo):
     if os.path.exists(db.DB_PATH):
         sys.exit(f'{db.DB_PATH} already exists, remove it first')
     db.init()
-    shutil.copy(photo, os.path.join(db.UPLOADS, 'author.jpg'))
     with db.session() as c:
+        c.execute('INSERT INTO files (name, mime, data) VALUES (?, ?, ?)', ('author.jpg', 'image/jpeg', open(photo, 'rb').read()))
         for k, v in {**SETTINGS, 'photo': 'author.jpg'}.items():
             c.execute('UPDATE settings SET value = ? WHERE key = ?', (v, k))
         for pos, (year, text) in enumerate(TIMELINE):

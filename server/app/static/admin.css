@@ -48,13 +48,9 @@ textarea { resize: vertical; line-height: 1.5; }
 .seg span { display: block; padding: 7px 14px; border-radius: 8px; font-size: .875rem; font-weight: 500; color: var(--label); }
 .seg input:checked + span { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 .seg input:focus-visible + span { outline: 2px solid var(--accent); }
-.editor-wrap { background: var(--card); border-radius: var(--r-m); box-shadow: var(--shadow); overflow: hidden; }
-.editor-wrap .ql-toolbar.ql-snow { border: 0; border-bottom: 1px solid var(--sep); position: sticky; top: 52px; background: var(--card); z-index: 5; }
-.editor-wrap .ql-container.ql-snow { border: 0; font-family: var(--f-read); font-size: 1.0625rem; }
-.editor-wrap .ql-editor { min-height: 360px; max-height: 70vh; overflow-y: auto; line-height: 1.6; color: var(--label); }
-.editor-wrap .ql-editor h2 { font-family: var(--f-ui); }
-.ql-snow .ql-stroke { stroke: var(--label-2); } .ql-snow .ql-fill { fill: var(--label-2); } .ql-snow .ql-picker { color: var(--label-2); }
-.ql-snow .ql-picker-options { background: var(--card); }
+.editor-wrap { background: var(--card); border-radius: var(--r-m); box-shadow: var(--shadow); }
+.editor-wrap textarea { width: 100%; min-height: 400px; border: 0; padding: 16px; font: 1rem/1.6 var(--f-read); }
+.editor-wrap .tox-tinymce { border: 0; border-radius: var(--r-m); }
 .savebar { position: sticky; bottom: 0; z-index: 10; background: var(--bar); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-top: 1px solid var(--sep); padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
 .savebar .in { max-width: 900px; margin: 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .notice { background: rgba(52, 199, 89, .14); border-radius: var(--r-s); padding: 12px 16px; font-weight: 500; }
@@ -70,3 +66,14 @@ textarea { resize: vertical; line-height: 1.5; }
   .admin .nav .links { gap: 14px; }
   .admin .nav .links a { font-size: .8125rem; }
 }
+
+/* Same paper and pomegranate palette as the public site */
+:root { --bg: #f6f0e4; --bg-2: #eee5d3; --card: #fbf7ee; --label: #241d18; --label-2: #5f5349; --label-3: #8b7e70;
+  --sep: #d8ccb6; --accent: #8c2b2b; --accent-hover: #6f1f1f; --bar: rgba(246, 240, 228, .9);
+  --f-read: "PT Serif", Georgia, serif; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #17130f; --bg-2: #1e1914; --card: #221b15; --label: #ece3d4; --label-2: #bfb2a1;
+    --label-3: #8f8374; --sep: #3b3128; --accent: #d98a76; --accent-hover: #e9a08d; --bar: rgba(23, 19, 15, .9); }
+}
+.admin .nav .brand, .admin h1 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; letter-spacing: 0; }
+.admin h1 { font-size: 2.6rem; }

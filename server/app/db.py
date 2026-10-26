@@ -32,6 +32,11 @@ CREATE TABLE IF NOT EXISTS works (
     position INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS files (
+    name TEXT PRIMARY KEY,
+    mime TEXT NOT NULL,
+    data BLOB NOT NULL
+);
 """
 
 DEFAULT_SETTINGS = {
@@ -72,6 +77,33 @@ def init():
         c.executescript(SCHEMA)
         for k, v in DEFAULT_SETTINGS.items():
             c.execute('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)', (k, v))
+        import_uploads(c)
+
+
+MIME = {'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp'}
+
+
+def sniff_image(data):
+    """Return the file extension for JPEG, PNG or WebP data, or None."""
+    if data[:3] == b'\xff\xd8\xff':
+        return '.jpg'
+    if data[:8] == b'\x89PNG\r\n\x1a\n':
+        return '.png'
+    if data[:4] == b'RIFF' and data[8:12] == b'WEBP':
+        return '.webp'
+    return None
+
+
+def import_uploads(c):
+    """Move photos saved as loose files by older versions into the database, so backups include them."""
+    if not os.path.isdir(UPLOADS):
+        return
+    for name in os.listdir(UPLOADS):
+        ext = os.path.splitext(name)[1].lower()
+        path = os.path.join(UPLOADS, name)
+        if ext in MIME and os.path.isfile(path):
+            with open(path, 'rb') as f:
+                c.execute('INSERT OR IGNORE INTO files (name, mime, data) VALUES (?, ?, ?)', (name, MIME[ext], f.read()))
 
 
 def settings(c):

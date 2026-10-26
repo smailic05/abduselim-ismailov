@@ -7,8 +7,8 @@
   <div class="nav-in">
     <a class="back-link" href="/#{{ w.section }}">Все произведения</a>
     <div class="size" role="group" aria-label="Размер текста">
-      <button type="button" id="smaller" aria-label="Уменьшить текст">A−</button>
-      <button type="button" id="bigger" aria-label="Увеличить текст">A+</button>
+      <button type="button" id="smaller" aria-label="Уменьшить текст">А−</button>
+      <button type="button" id="bigger" aria-label="Увеличить текст">А+</button>
     </div>
   </div>
 </header>
@@ -17,6 +17,7 @@
     <p class="eyebrow">{{ s.name }}</p>
     <h1>{{ w.title }}</h1>
     {% if w.subtitle %}<p class="sub">{{ w.subtitle }}</p>{% endif %}
+    <span class="ornament" aria-hidden="true"></span>
     <div class="meta-row"><span class="chip">{{ LANGS[w.lang] }}</span><span class="chip">около {{ pages }} {{ plural(pages, ('страницы', 'страниц', 'страниц')) }}</span></div>
   </div>
   {% if full and heads|length >= 2 %}
