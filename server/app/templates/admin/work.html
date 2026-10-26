@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ w.title or 'Новое произведение' }}{% endblock %}
+{% block content %}
+<form class="form" method="post" action="{{ '/admin/works/%d' % w.id if w.id else '/admin/works/new' }}" enctype="multipart/form-data" id="workform">
+<main class="gutter">
+  <div class="toolbar">
+    <h1>{{ w.title or 'Новое произведение' }}</h1>
+    {% if w.id and w.visibility != 'hidden' %}<a class="more" href="/read/{{ w.slug }}" target="_blank" rel="noopener">Открыть на сайте</a>{% endif %}
+  </div>
+  {% if saved %}<p class="notice">Сохранено.</p>{% endif %}
+
+  <div class="card">
+    <div class="fields">
+      <div class="field wide"><label for="title">Название</label><input id="title" name="title" type="text" value="{{ w.title }}" required></div>
+      <div class="field wide"><label for="subtitle">Подзаголовок</label><input id="subtitle" name="subtitle" type="text" value="{{ w.subtitle }}" placeholder="Например: Повесть или Стихи, Махачкала, 2009"></div>
+      <div class="field"><label for="section">Раздел</label><select id="section" name="section">{% for k, n in SECTIONS %}<option value="{{ k }}" {% if w.section == k %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+      <div class="field"><label for="lang">Язык</label><select id="lang" name="lang">{% for k, n in LANGS.items() %}<option value="{{ k }}" {% if w.lang == k %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+      <div class="field"><label for="style">Вид текста</label><select id="style" name="style">{% for k, n in STYLES.items() %}<option value="{{ k }}" {% if w.style == k %}selected{% endif %}>{{ n }}</option>{% endfor %}</select><span class="hint">Влияет на отступы: у стихов строки идут плотнее.</span></div>
+      <div class="field"><span class="lbl">Цвет обложки</span><div class="colors">{% for i in range(8) %}<label><input type="radio" name="color" value="{{ i }}" {% if w.color == i %}checked{% endif %} aria-label="Цвет {{ i + 1 }}"><span class="c{{ i }}"></span></label>{% endfor %}</div><span class="hint">Видна в разделе «Книги».</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="field"><span class="lbl">Что показывать на сайте</span>
+      <div class="seg">{% for k, n in VISIBILITY.items() %}<label><input type="radio" name="visibility" value="{{ k }}" {% if w.visibility == k %}checked{% endif %}><span>{{ n }}</span></label>{% endfor %}</div>
+      <span class="hint">«Только начало» показывает первые символы текста, полный текст остаётся на сервере. «Скрыто» убирает произведение с сайта.</span>
+    </div>
+    <div class="field" style="max-width: 240px"><label for="excerpt_chars">Длина начала, символов</label><input id="excerpt_chars" name="excerpt_chars" type="number" min="300" max="50000" step="100" value="{{ w.excerpt_chars }}"><span class="hint">2200 символов — примерно одна книжная страница.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="field"><label for="docx">Загрузить текст из Word</label><input id="docx" name="docx" type="file" accept=".doc,.docx"><span class="hint">Если выбрать файл, он заменит текст ниже. Заголовки, написанные заглавными буквами, станут разделами.</span></div>
+  </div>
+
+  <div class="section-block">
+    <h2>Текст</h2>
+    <div class="editor-wrap"><textarea id="body" name="body" rows="30">{{ w.body }}</textarea></div>
+    <p class="hint">Текст можно вставить прямо из Word: форматирование сохранится. «Заголовок раздела» попадает в содержание произведения.</p>
+  </div>
+
+  {% if w.id %}
+  <div class="card">
+    <h2>Удалить произведение</h2>
+    <p class="muted">Произведение исчезнет с сайта и из админки. Если хотите только убрать его с сайта, выберите «Скрыто».</p>
+    <div><button class="btn danger" type="submit" form="deleteform">Удалить навсегда</button></div>
+  </div>
+  {% endif %}
+</main>
+<div class="savebar gutter"><div class="in"><a href="/admin">‹ <span class="long">Ко всем произведениям</span><span class="short">Назад</span></a><button class="btn" type="submit">Сохранить</button></div></div>
+</form>
+{% if w.id %}<form id="deleteform" method="post" action="/admin/works/{{ w.id }}/delete" onsubmit="return confirm('Удалить «{{ w.title }}» навсегда?')"></form>{% endif %}
+<script src="/static/vendor/tinymce/tinymce.min.js"></script>
+<script src="/static/editor.js"></script>
+<script>initEditor('#body');</script>
+{% endblock %}

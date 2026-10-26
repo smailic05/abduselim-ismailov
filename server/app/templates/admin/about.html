@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block title %}Об авторе{% endblock %}
+{% block content %}
+<form class="form" method="post" action="/admin/about" enctype="multipart/form-data" id="aboutform">
+<main class="gutter">
+  <h1>Об авторе</h1>
+  {% if saved %}<p class="notice">Сохранено.</p>{% endif %}
+  <div class="card">
+    <h2>Первый экран</h2>
+    <div class="fields">
+      <div class="field"><label for="name">Имя</label><input id="name" name="name" type="text" value="{{ s.name }}"></div>
+      <div class="field"><label for="eyebrow">Надпись над именем</label><input id="eyebrow" name="eyebrow" type="text" value="{{ s.eyebrow }}"></div>
+      <div class="field wide"><label for="tagline">Подзаголовок</label><textarea id="tagline" name="tagline" rows="2">{{ s.tagline }}</textarea></div>
+      <div class="field wide"><label for="photo">Фотография</label>
+        {% if s.photo %}<img src="/uploads/{{ s.photo }}" alt="" style="width: 120px; border-radius: 8px" onerror="this.remove()">{% endif %}
+        <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp"><span class="hint">JPG, PNG или WebP. Лучше вертикальное фото. Фото хранится вместе с текстами и попадает в резервную копию.</span></div>
+      <div class="field wide"><label for="stats">Плашки с цифрами</label><textarea id="stats" name="stats" rows="4">{{ s.stats }}</textarea><span class="hint">Одна плашка на строку: «число | подпись». Вместо числа можно написать {count}, тогда подставится число произведений на сайте.</span></div>
+      <div class="field"><label for="quote">Цитата</label><textarea id="quote" name="quote" rows="3">{{ s.quote }}</textarea></div>
+      <div class="field"><label for="quote_source">Откуда цитата</label><input id="quote_source" name="quote_source" type="text" value="{{ s.quote_source }}"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Биография</h2>
+    <div class="field"><label for="bio_lede">Строка под заголовком</label><input id="bio_lede" name="bio_lede" type="text" value="{{ s.bio_lede }}"></div>
+    <div class="field"><span class="lbl">Текст биографии</span><div class="editor-wrap"><textarea id="bio" name="bio" rows="14">{{ s.bio }}</textarea></div></div>
+    <div class="field"><label for="timeline">Хронология</label><textarea id="timeline" name="timeline" rows="10">{{ timeline }}</textarea><span class="hint">Одно событие на строку: «год | что произошло».</span></div>
+    <div class="field"><label for="footer">Подпись внизу сайта</label><input id="footer" name="footer" type="text" value="{{ s.footer }}"></div>
+  </div>
+</main>
+<div class="savebar gutter"><div class="in"><a href="/admin">‹ Ко всем произведениям</a><button class="btn" type="submit">Сохранить</button></div></div>
+</form>
+<script src="/static/vendor/tinymce/tinymce.min.js"></script>
+<script src="/static/editor.js"></script>
+<script>initEditor('#bio', { full: false });</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>{% block title %}Админка{% endblock %} · сайт Абдуселима Исмаилова</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 20 20%27%3E%3Cpath fill=%27%238c2b2b%27 fill-rule=%27evenodd%27 d=%27M10 1l9 9-9 9-9-9zM10 5.5L5.5 10l4.5 4.5 4.5-4.5z%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/admin-base.css">
+<link rel="stylesheet" href="/static/admin.css">
+{% block head %}{% endblock %}
+</head>
+<body class="admin">
+<header class="nav gutter">
+  <div class="nav-in">
+    <a class="brand" href="/admin">Админка</a>
+    <nav class="links" aria-label="Разделы админки">
+      <a href="/admin">Произведения</a>
+      <a href="/admin/about">Об авторе</a>
+      <a href="/" target="_blank" rel="noopener">Сайт</a>
+    </nav>
+  </div>
+</header>
+{% block content %}{% endblock %}
+</body>
+</html>

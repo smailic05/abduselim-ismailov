@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ w.title }} · {{ s.name }}{% endblock %}
+{% block description %}{{ w.title }}. {{ w.subtitle }}. {{ s.name }}.{% endblock %}
+{% block bodyclass %}reader {{ w.style }}{% endblock %}
+{% block content %}
+<header class="nav gutter">
+  <div class="nav-in">
+    <a class="back-link" href="/#{{ w.section }}">Все произведения</a>
+    <div class="size" role="group" aria-label="Размер текста">
+      <button type="button" id="smaller" aria-label="Уменьшить текст">А−</button>
+      <button type="button" id="bigger" aria-label="Увеличить текст">А+</button>
+    </div>
+  </div>
+</header>
+<main class="page gutter">
+  <div class="titleblock">
+    <p class="eyebrow">{{ s.name }}</p>
+    <h1>{{ w.title }}</h1>
+    {% if w.subtitle %}<p class="sub">{{ w.subtitle }}</p>{% endif %}
+    <span class="ornament" aria-hidden="true"></span>
+    <div class="meta-row"><span class="chip">{{ LANGS[w.lang] }}</span><span class="chip">около {{ pages }} {{ plural(pages, ('страницы', 'страниц', 'страниц')) }}</span></div>
+  </div>
+  {% if full and heads|length >= 2 %}
+  <details class="toc"><summary>Содержание · {{ heads|length }} {{ plural(heads|length, ('раздел', 'раздела', 'разделов')) }}</summary><ol>{% for id, t in heads %}<li><a href="#{{ id }}">{{ t }}</a></li>{% endfor %}</ol></details>
+  {% elif not full and toc_titles|length >= 2 %}
+  <details class="toc"><summary>Что входит · {{ toc_titles|length }} {{ plural(toc_titles|length, ('раздел', 'раздела', 'разделов')) }}</summary><ol>{% for t in toc_titles %}<li>{{ t }}</li>{% endfor %}</ol></details>
+  {% endif %}
+  <article class="text{% if not full %} fade{% endif %}" lang="{{ 'ru' if w.lang == 'ru' else 'lez' }}">
+{{ body|safe }}
+  </article>
+  {% if not full %}<div class="endnote"><b>Это начало произведения</b><span>Полный текст хранится в семейном архиве автора.</span></div>{% endif %}
+  <nav class="pager" aria-label="Другие произведения">
+    {% if prev %}<a class="pn prev" href="/read/{{ prev.slug }}"><small>Предыдущее</small><span>{{ prev.title }}</span></a>{% endif %}
+    {% if next %}<a class="pn next" href="/read/{{ next.slug }}"><small>Следующее</small><span>{{ next.title }}</span></a>{% endif %}
+  </nav>
+</main>
+<script src="/static/reader.js"></script>
+{% endblock %}

@@ -1,0 +1,5 @@
+# full texts and passwords stay on the server, never in the public repository
+data/
+.env
+__pycache__/
+certs/

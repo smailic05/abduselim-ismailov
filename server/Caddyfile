@@ -1,0 +1,14 @@
+{$DOMAIN} {
+	# set by tools/dns-cert.sh when Let's Encrypt cannot reach this server directly
+	{$CADDY_TLS}
+	encode gzip
+	request_body {
+		max_size 60MB
+	}
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+	}
+	reverse_proxy app:8000
+}
