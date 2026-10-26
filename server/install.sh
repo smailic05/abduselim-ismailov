@@ -12,6 +12,13 @@ if [ "$(id -u)" -ne 0 ]; then echo "Запустите через sudo"; exit 1;
 if ! command -v git >/dev/null; then apt-get update && apt-get install -y git curl; fi
 if ! command -v docker >/dev/null; then curl -fsSL https://get.docker.com | sh; fi
 
+# Docker Hub is unreachable from some networks (for example Russian hosting); pull through mirrors, falling back to Hub
+if [ ! -f /etc/docker/daemon.json ]; then
+  mkdir -p /etc/docker
+  echo '{"registry-mirrors":["https://mirror.gcr.io","https://dockerhub.timeweb.cloud"]}' > /etc/docker/daemon.json
+  systemctl restart docker
+fi
+
 if [ -d "$DIR/.git" ]; then
   git -C "$DIR" fetch origin "$BRANCH" && git -C "$DIR" checkout -B "$BRANCH" "origin/$BRANCH"
 else
