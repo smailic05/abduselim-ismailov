@@ -23,8 +23,12 @@ if [ ! -f .env ]; then
   IP=$(curl -fsS https://api.ipify.org || hostname -I | awk '{print $1}')
   echo
   echo "Адрес сайта. Если своего домена нет, нажмите Enter: сайт будет на ${IP}.sslip.io"
-  read -r -p "Домен: " DOMAIN </dev/tty
-  DOMAIN=${DOMAIN:-${IP}.sslip.io}
+  while true; do
+    read -r -p "Домен: " DOMAIN </dev/tty
+    DOMAIN=${DOMAIN:-${IP}.sslip.io}
+    [[ "$DOMAIN" == *.* ]] && break
+    echo "Это не домен. Введите купленный домен вроде example.ru или просто нажмите Enter."
+  done
   while true; do
     read -r -s -p "Пароль для админки (не короче 8 символов): " PASS </dev/tty; echo
     [ ${#PASS} -ge 8 ] && break
